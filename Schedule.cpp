@@ -1,68 +1,126 @@
 #include "Schedule.h"
-#include <iostream>
-#include <string>
-#include <fstream>
 #include <sstream>
+#include <iostream>
+#include <fstream>
 
-
-// Initialize the schedule by reading from a file
+// Function to initialize the schedule data
 void Schedule::initSchedule(std::ifstream& file) {
     std::string line;
-    // Skip the header
-    std::getline(file, line);
+
+    // Skip the header line
+    if (!std::getline(file, line)) {
+        std::cerr << "Error reading file header" << std::endl;
+        return;
+    }
 
     while (std::getline(file, line)) {
-        std::istringstream iss(line);
-        std::string subject, catalog, section, component, session, instructor;
-        int units, totEnrl, capEnrl;
+        ScheduleItem item;
 
-        char delimiter; // For parsing commas
-        iss >> subject >> delimiter >> catalog >> delimiter >> section >> delimiter
-            >> component >> delimiter >> session >> delimiter >> units >> delimiter
-            >> totEnrl >> delimiter >> capEnrl >> delimiter;
-
-        std::getline(iss, instructor); // Instructor field may contain spaces
-
-        ScheduleItem item(subject, catalog, section, component, session, units, totEnrl, capEnrl, instructor);
-        addEntry(item);
+        if (parseRecord(line, item)) {
+            std::cout << "Loaded record: "; // Debugging output
+            item.print();
+            records.push_back(item);
+        }
+        else {
+            std::cerr << "Failed to parse record line: " << line << std::endl;
+        }
     }
 }
 
-// Add a ScheduleItem to the map
-void Schedule::addEntry(const ScheduleItem& item) {
-    scheduleMap[item.getKey()] = item;
+// Function to parse a record from a CSV-like line
+bool Schedule::parseRecord(const std::string& line, ScheduleItem& item) {
+    std::istringstream ss(line);
+    std::string subj, cat, sec, comp, sess, instr;
+    int minUnits, units, totEnrl, capEnrl;
+
+    // Handle CSV parsing with proper quotes
+    if (std::getline(ss, subj, ',') &&
+        std::getline(ss, cat, ',') &&
+        std::getline(ss, sec, ',') &&
+        std::getline(ss, comp, ',') &&
+        std::getline(ss, sess, ',') &&
+        ss >> minUnits >> units >> totEnrl >> capEnrl) {
+
+        // Handle quoted string for instructor
+        std::string quotedField;
+        if (ss.peek() == '"') { // Detect quoted fields
+            ss.get(); // Consume the starting quote
+            std::getline(ss, instr, '"'); // Read until the ending quote
+        }
+        else {
+            ss >> instr; // Otherwise read normally
+        }
+
+        // Populate the ScheduleItem
+        
+        return true;
+    }
+
+    std::cerr << "Error parsing record fields" << std::endl;
+    return false;
 }
 
-// Print all the schedule items
+
+// Prints all loaded records
 void Schedule::print() const {
-    for (const auto& pair : scheduleMap) {
-        pair.second.print();
+    if (records.empty()) {
+        std::cout << "No schedule items to print." << std::endl;
+        return;
+    }
+
+    std::cout << "\nPrinting Schedule Records:\n";
+    for (const auto& item : records) {
+        item.print();
     }
 }
 
-// Find by Subject
-void Schedule::findBySubject(const std::string& subject) const {
-    for (const auto& pair : scheduleMap) {
-        if (pair.second.getSubject() == subject) {
-            pair.second.print();
+// Search by subject
+bool Schedule::findBySubject(const std::string& subject) const {
+    bool found = false;
+
+    for (const auto& item : records) {
+        if (item.getSubject() == subject) {
+            item.print();
+            found = true;
         }
     }
+
+    if (!found) {
+        std::cout << "No matching records found for subject: " << subject << std::endl;
+    }
+    return found;
 }
 
-// Find by Subject and Catalog
-void Schedule::findBySubjectCatalog(const std::string& subject, const std::string& catalog) const {
-    for (const auto& pair : scheduleMap) {
-        if (pair.second.getSubject() == subject && pair.second.getCatalog() == catalog) {
-            pair.second.print();
+// Search by subject and catalog combination
+bool Schedule::findBySubjectCatalog(const std::string& subject, const std::string& catalog) const {
+    bool found = false;
+
+    for (const auto& item : records) {
+        if (item.getSubject() == subject && item.getCatalog() == catalog) {
+            item.print();
+            found = true;
         }
     }
+
+    if (!found) {
+        std::cout << "No matching records found for subject + catalog combination." << std::endl;
+    }
+    return found;
 }
 
-// Find by Instructor's Last Name
-void Schedule::findByInstructor(const std::string& instructorLastName) const {
-    for (const auto& pair : scheduleMap) {
-        if (pair.second.getInstructor().find(instructorLastName) != std::string::npos) {
-            pair.second.print();
+// Search by instructor's last name
+bool Schedule::findByInstructor(const std::string& instructorLastName) const {
+    bool found = false;
+
+    for (const auto& item : records) {
+        if (item.getInstructor().find(instructorLastName) != std::string::npos) {
+            item.print();
+            found = true;
         }
     }
+
+    if (!found) {
+        std::cout << "No matching records found for instructor's last name." << std::endl;
+    }
+    return found;
 }

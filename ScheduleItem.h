@@ -14,6 +14,7 @@ private:
     int units, totEnrl, capEnrl;
 
 public:
+
     // Constructor with default parameters
     ScheduleItem(
         std::string subj = "", std::string cat = "", std::string sec = "",

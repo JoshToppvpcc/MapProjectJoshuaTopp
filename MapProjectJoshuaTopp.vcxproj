@@ -132,6 +132,7 @@
     <ClCompile Include="ScheduleItem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Parsing.h" />
     <ClInclude Include="Schedule.h" />
     <ClInclude Include="ScheduleItem.h" />
   </ItemGroup>
