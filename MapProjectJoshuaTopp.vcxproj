@@ -132,11 +132,11 @@
     <ClCompile Include="ScheduleItem.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\Downloads\data.csv" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="Schedule.h" />
     <ClInclude Include="ScheduleItem.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\Downloads\data.csv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
