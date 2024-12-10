@@ -7,7 +7,7 @@
 
 int main() {
     Schedule schedule;
-    std::ifstream file("data.csv");
+    std::ifstream file("Cdata.txt");
 
     if (!file) {
         std::cerr << "Error: Could not open file." << std::endl;
