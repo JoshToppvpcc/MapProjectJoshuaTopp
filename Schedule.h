@@ -1,26 +1,24 @@
 #pragma once
+// Schedule.h
 #ifndef SCHEDULE_H
 #define SCHEDULE_H
 
 #include "ScheduleItem.h"
-#include <vector>
+#include <map>
 #include <string>
-#include <fstream>
+#include <vector>
+#include <iostream>
 
 class Schedule {
 private:
-    std::vector<ScheduleItem> records;
+    std::map<std::string, ScheduleItem> records;
 
 public:
-    void initSchedule(std::ifstream& file);
-    void print() const;
-
-    bool findBySubject(const std::string& subject) const;
-    bool findBySubjectCatalog(const std::string& subject, const std::string& catalog) const;
-    bool findByInstructor(const std::string& instructorLastName) const;
-
-private:
-    bool parseRecord(const std::string& line, ScheduleItem& item);
+    void loadFromFile(const std::string& fileName);
+    void printAll() const;
+    void findBySubject(const std::string& subject) const;
+    void findBySubjectAndCatalog(const std::string& subject, const std::string& catalog) const;
+    void findByInstructorLastName(const std::string& lastName) const;
 };
 
 #endif // SCHEDULE_H

@@ -1,43 +1,31 @@
 #pragma once
-#include <string>
-#include <iostream>
-
+// ScheduleItem.h
 #ifndef SCHEDULEITEM_H
 #define SCHEDULEITEM_H
 
 #include <string>
-#include <iostream> // Required for std::cout
+#include <sstream>
+#include <iomanip>
 
 class ScheduleItem {
 private:
-    std::string subject, catalog, section, component, session, instructor;
-    int units, totEnrl, capEnrl;
+    std::string subject;
+    std::string catalog;
+    std::string section;
+    std::string component;
+    std::string instructorLastName;
 
 public:
+    ScheduleItem() = default; // Default constructor
+    ScheduleItem(const std::string& subj, const std::string& cat, const std::string& sec,
+        const std::string& comp, const std::string& instrLastName);
 
-    // Constructor with default parameters
-    ScheduleItem(
-        std::string subj = "", std::string cat = "", std::string sec = "",
-        std::string comp = "", std::string sess = "", int unit = 0,
-        int totEn = 0, int capEn = 0, std::string instr = "");
-
-    // Getter methods
-    std::string getKey() const;
     std::string getSubject() const;
     std::string getCatalog() const;
     std::string getSection() const;
-    std::string getInstructor() const;
-    int getUnits() const;
-    int getTotEnrl() const;
-    int getCapEnrl() const;
+    std::string getInstructorLastName() const;
 
-    // Overloaded operators
-    bool operator==(const ScheduleItem& other) const;
-    bool operator!=(const ScheduleItem& other) const;
-    bool operator>=(const ScheduleItem& other) const;
-
-    // Print method
-    void print() const;
+    std::string toString() const;
 };
 
 #endif // SCHEDULEITEM_H

@@ -1,126 +1,92 @@
+// Schedule.cpp
 #include "Schedule.h"
+#include <fstream>
 #include <sstream>
 #include <iostream>
-#include <fstream>
 
-// Function to initialize the schedule data
-void Schedule::initSchedule(std::ifstream& file) {
+void Schedule::loadFromFile(const std::string& fileName) {
+    std::ifstream file(fileName);
+    if (!file.is_open()) {
+        std::cerr << "Error opening file: " << fileName << std::endl;
+        return;
+    }
+
     std::string line;
-
-    // Skip the header line
-    if (!std::getline(file, line)) {
-        std::cerr << "Error reading file header" << std::endl;
-        return;
-    }
-
     while (std::getline(file, line)) {
-        ScheduleItem item;
+        std::stringstream ss(line);
+        std::string subject, catalog, section, component, instructor;
 
-        if (parseRecord(line, item)) {
-            std::cout << "Loaded record: "; // Debugging output
-            item.print();
-            records.push_back(item);
+        std::getline(ss, subject, ',');
+        std::getline(ss, catalog, ',');
+        std::getline(ss, section, ',');
+        std::getline(ss, component, ',');
+        for (int i = 0; i < 7; ++i) {
+            std::string temp;
+            std::getline(ss, temp, ',');
         }
-        else {
-            std::cerr << "Failed to parse record line: " << line << std::endl;
-        }
-    }
-}
+        std::getline(ss, instructor, ',');
 
-// Function to parse a record from a CSV-like line
-bool Schedule::parseRecord(const std::string& line, ScheduleItem& item) {
-    std::istringstream ss(line);
-    std::string subj, cat, sec, comp, sess, instr;
-    int minUnits, units, totEnrl, capEnrl;
+        size_t commaPos = instructor.find(',');
+        std::string instructorLastName = (commaPos != std::string::npos) ? instructor.substr(0, commaPos) : instructor;
 
-    // Handle CSV parsing with proper quotes
-    if (std::getline(ss, subj, ',') &&
-        std::getline(ss, cat, ',') &&
-        std::getline(ss, sec, ',') &&
-        std::getline(ss, comp, ',') &&
-        std::getline(ss, sess, ',') &&
-        ss >> minUnits >> units >> totEnrl >> capEnrl) {
-
-        // Handle quoted string for instructor
-        std::string quotedField;
-        if (ss.peek() == '"') { // Detect quoted fields
-            ss.get(); // Consume the starting quote
-            std::getline(ss, instr, '"'); // Read until the ending quote
-        }
-        else {
-            ss >> instr; // Otherwise read normally
-        }
-
-        // Populate the ScheduleItem
-        
-        return true;
+        std::string key = subject + " " + catalog + " " + section;
+        records[key] = ScheduleItem(subject, catalog, section, component, instructorLastName);
     }
 
-    std::cerr << "Error parsing record fields" << std::endl;
-    return false;
+    std::cout << "Loaded " << records.size() << " records." << std::endl;
 }
 
-
-// Prints all loaded records
-void Schedule::print() const {
+void Schedule::printAll() const {
     if (records.empty()) {
-        std::cout << "No schedule items to print." << std::endl;
+        std::cout << "No records available." << std::endl;
         return;
     }
 
-    std::cout << "\nPrinting Schedule Records:\n";
-    for (const auto& item : records) {
-        item.print();
+    std::cout << std::left << std::setw(8) << "Subject" << std::setw(8) << "Catalog"
+        << std::setw(8) << "Section" << std::setw(12) << "Component"
+        << std::setw(15) << "Instructor" << std::endl;
+    std::cout << "---------------------------------------------------------" << std::endl;
+
+    for (const auto& pair : records) {
+        std::cout << pair.second.toString() << std::endl;
     }
 }
 
-// Search by subject
-bool Schedule::findBySubject(const std::string& subject) const {
+void Schedule::findBySubject(const std::string& subject) const {
     bool found = false;
-
-    for (const auto& item : records) {
-        if (item.getSubject() == subject) {
-            item.print();
+    for (const auto& pair : records) {
+        if (pair.second.getSubject() == subject) {
+            std::cout << pair.second.toString() << std::endl;
             found = true;
         }
     }
-
     if (!found) {
-        std::cout << "No matching records found for subject: " << subject << std::endl;
+        std::cout << "No records found for subject: " << subject << std::endl;
     }
-    return found;
 }
 
-// Search by subject and catalog combination
-bool Schedule::findBySubjectCatalog(const std::string& subject, const std::string& catalog) const {
+void Schedule::findBySubjectAndCatalog(const std::string& subject, const std::string& catalog) const {
     bool found = false;
-
-    for (const auto& item : records) {
-        if (item.getSubject() == subject && item.getCatalog() == catalog) {
-            item.print();
+    for (const auto& pair : records) {
+        if (pair.second.getSubject() == subject && pair.second.getCatalog() == catalog) {
+            std::cout << pair.second.toString() << std::endl;
             found = true;
         }
     }
-
     if (!found) {
-        std::cout << "No matching records found for subject + catalog combination." << std::endl;
+        std::cout << "No records found for subject and catalog: " << subject << " " << catalog << std::endl;
     }
-    return found;
 }
 
-// Search by instructor's last name
-bool Schedule::findByInstructor(const std::string& instructorLastName) const {
+void Schedule::findByInstructorLastName(const std::string& lastName) const {
     bool found = false;
-
-    for (const auto& item : records) {
-        if (item.getInstructor().find(instructorLastName) != std::string::npos) {
-            item.print();
+    for (const auto& pair : records) {
+        if (pair.second.getInstructorLastName() == lastName) {
+            std::cout << pair.second.toString() << std::endl;
             found = true;
         }
     }
-
     if (!found) {
-        std::cout << "No matching records found for instructor's last name." << std::endl;
+        std::cout << "No records found for instructor last name: " << lastName << std::endl;
     }
-    return found;
 }
